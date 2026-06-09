@@ -1,73 +1,58 @@
-# React + TypeScript + Vite
+# EcoSphere (Aura Eco-Tracker)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+AI-Powered Eco-Intelligence. Track, analyze, and shrink your carbon footprint in real-time.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **3D EcoVisualizer**: An interactive, real-time representation of your carbon footprint built with React Three Fiber.
+- **Swipe Tracker**: Quick and engaging daily check-ins using intuitive swipe mechanics.
+- **AI Oracle**: Automated insights, tailored praise, and suggestions based on your logged actions.
+- **Gamified Quests**: Complete challenges to reduce your environmental impact and improve your global ranking.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: React 19, TypeScript, Vite
+- **Styling**: Tailwind CSS
+- **Animations**: Framer Motion
+- **3D Rendering**: Three.js, React Three Fiber, React Three Drei
+- **Routing**: React Router DOM
+- **Icons**: Lucide React
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Prerequisites
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Ensure you have Node.js installed (v18 or higher recommended).
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+### Installation
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Samyakj-07/EcoSphere.git
+   ```
+2. Navigate to the project directory:
+   ```bash
+   cd EcoSphere
+   ```
+3. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+### Running Locally
+
+Start the development server:
+
+```bash
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The application will be available at `http://localhost:5173`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+### Building for Production
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+To build the project for production:
+
+```bash
+npm run build
 ```
