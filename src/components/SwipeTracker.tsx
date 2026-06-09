@@ -3,15 +3,17 @@ import { Check, X, RotateCcw } from 'lucide-react';
 import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion';
 import { useEco, type ActionId } from '../context/EcoContext';
 
+import { IMPACT_SCORES } from '../config/constants';
+
 const DAILY_ACTIONS: { id: ActionId; text: string; impact: number }[] = [
-  { id: 'reusable_cup', text: "Did you use a reusable cup today?", impact: -5 },
-  { id: 'plant_based', text: "Ate a plant-based meal?", impact: -15 },
-  { id: 'transit_bike', text: "Walked, biked or took public transit?", impact: -20 },
-  { id: 'cold_wash', text: "Washed clothes in cold water?", impact: -10 },
-  { id: 'no_food_waste', text: "Had zero food waste today?", impact: -10 },
-  { id: 'second_hand', text: "Bought something second-hand instead of new?", impact: -25 },
-  { id: 'short_shower', text: "Took a shower under 5 minutes?", impact: -5 },
-  { id: 'turn_off_lights', text: "Turned off lights when leaving rooms?", impact: -2 },
+  { id: 'reusable_cup', text: "Did you use a reusable cup today?", impact: IMPACT_SCORES.reusable_cup },
+  { id: 'plant_based', text: "Ate a plant-based meal?", impact: IMPACT_SCORES.plant_based },
+  { id: 'transit_bike', text: "Walked, biked or took public transit?", impact: IMPACT_SCORES.transit_bike },
+  { id: 'cold_wash', text: "Washed clothes in cold water?", impact: IMPACT_SCORES.cold_wash },
+  { id: 'no_food_waste', text: "Had zero food waste today?", impact: IMPACT_SCORES.no_food_waste },
+  { id: 'second_hand', text: "Bought something second-hand instead of new?", impact: IMPACT_SCORES.second_hand },
+  { id: 'short_shower', text: "Took a shower under 5 minutes?", impact: IMPACT_SCORES.short_shower },
+  { id: 'turn_off_lights', text: "Turned off lights when leaving rooms?", impact: IMPACT_SCORES.turn_off_lights },
 ];
 
 export default function SwipeTracker() {

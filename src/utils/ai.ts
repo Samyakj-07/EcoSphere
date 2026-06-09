@@ -26,11 +26,13 @@ export async function generateInsights(history: LoggedAction[], currentScore: nu
         }];
     }
 
+    const compressedHistory = history.slice(0, 10).map(a => ({ a: a.id, i: a.impact }));
+    
     const prompt = `
       You are the "AI Oracle" for an eco-tracking app called EcoSphere.
       The user's current carbon footprint score is ${currentScore} (0 is best, 100 is worst).
-      Here is the user's recent logged action history:
-      ${JSON.stringify(history.slice(0, 5))}
+      Here is the user's recent logged action history (a=action, i=impact):
+      ${JSON.stringify(compressedHistory)}
       
       Generate exactly 1 personalized, encouraging insight for the user based strictly on their recent actions.
       Limit the insight to 2 concise sentences. Be punchy and modern.

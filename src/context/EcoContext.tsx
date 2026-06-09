@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { doc, setDoc, onSnapshot } from 'firebase/firestore';
-import { db } from '../config/firebase';
+import { signInAnonymously, onAuthStateChanged } from 'firebase/auth';
+import { db, auth } from '../config/firebase';
 
 export type ActionId = 'reusable_cup' | 'plant_based' | 'transit_bike' | 'cold_wash' | 'no_food_waste' | 'second_hand' | 'short_shower' | 'turn_off_lights';
 
@@ -71,19 +72,9 @@ export const EcoProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [history, setHistory] = useState<LoggedAction[]>(initialState.history);
   const [quests, setQuests] = useState<Quest[]>(initialState.quests);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
-  const getDeviceId = () => {
-    let id = localStorage.getItem('ecoSphere_device_id');
-    if (!id) {
-      id = 'user_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-      localStorage.setItem('ecoSphere_device_id', id);
-    }
-    return id;
-  };
-
-  const USER_DOC_ID = React.useMemo(() => getDeviceId(), []);
-
-  // Load from Firebase
+  // Auth Listener
   useEffect(() => {
     if (!import.meta.env.VITE_FIREBASE_PROJECT_ID || import.meta.env.VITE_FIREBASE_PROJECT_ID === "YOUR_FIREBASE_PROJECT_ID") {
       console.warn("Firebase config is missing in .env.local. Falling back to memory state.");
@@ -91,9 +82,24 @@ export const EcoProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       return;
     }
 
-    const userDocRef = doc(db, 'users', USER_DOC_ID);
+    const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+      } else {
+        signInAnonymously(auth).catch(console.error);
+      }
+    });
+
+    return () => unsubscribeAuth();
+  }, []);
+
+  // Database Listener
+  useEffect(() => {
+    if (!userId) return;
+
+    const userDocRef = doc(db, 'users', userId);
     
-    const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+    const unsubscribeDb = onSnapshot(userDocRef, (docSnap) => {
       if (docSnap.exists()) {
         const data = docSnap.data();
         setScore(data.score ?? initialState.score);
@@ -117,8 +123,8 @@ export const EcoProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       alert("Database Error: Make sure your Firestore Database is created in 'Test Mode'. Check browser console for details.");
     });
 
-    return () => unsubscribe();
-  }, []);
+    return () => unsubscribeDb();
+  }, [userId]);
 
   const logAction = async (actionId: ActionId, text: string, impact: number) => {
     const newScore = Math.max(0, score + impact);
@@ -150,14 +156,14 @@ export const EcoProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setQuests(newQuests);
 
     // Save to Firebase
-    if (import.meta.env.VITE_FIREBASE_PROJECT_ID && import.meta.env.VITE_FIREBASE_PROJECT_ID !== "YOUR_FIREBASE_PROJECT_ID") {
-        const userDocRef = doc(db, 'users', USER_DOC_ID);
+    if (userId) {
+        const userDocRef = doc(db, 'users', userId);
         await setDoc(userDocRef, {
           score: newScore,
           points: newPoints,
           history: newHistory,
           quests: newQuests
-        }, { merge: true });
+        }, { merge: true }).catch(console.error);
     }
   };
 
@@ -167,14 +173,14 @@ export const EcoProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setHistory(initialState.history);
     setQuests(initialState.quests);
 
-    if (import.meta.env.VITE_FIREBASE_PROJECT_ID && import.meta.env.VITE_FIREBASE_PROJECT_ID !== "YOUR_FIREBASE_PROJECT_ID") {
-        const userDocRef = doc(db, 'users', USER_DOC_ID);
+    if (userId) {
+        const userDocRef = doc(db, 'users', userId);
         await setDoc(userDocRef, {
           score: initialState.score,
           points: initialState.points,
           history: initialState.history,
           quests: initialState.quests
-        });
+        }).catch(console.error);
     }
   };
 
