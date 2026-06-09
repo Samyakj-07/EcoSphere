@@ -22,9 +22,9 @@ function App() {
       </div>
 
       {/* Force h-screen and prevent global scroll on desktop */}
-      <div className="h-screen w-full font-sans selection:bg-eco-green-500/30 flex flex-col text-slate-100 overflow-hidden">
+      <div className="h-screen w-full font-sans selection:bg-eco-green-500/30 flex flex-col text-slate-100 overflow-x-hidden">
         {location.pathname !== '/' && <Navigation />}
-        <div className="flex-1 w-full max-w-7xl mx-auto px-6 pb-6 pt-2 relative z-10 flex flex-col overflow-hidden">
+        <div className="flex-1 w-full max-w-7xl mx-auto px-6 pb-6 pt-2 relative z-10 flex flex-col overflow-y-auto">
           <AnimatePresence mode="wait">
             <Routes location={location} key={location.pathname}>
               <Route path="/" element={<Landing />} />

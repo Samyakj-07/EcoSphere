@@ -36,7 +36,7 @@ export default function Dashboard() {
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -40 }}
       transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-      className="w-full h-full flex flex-col relative"
+      className="w-full min-h-full flex flex-col relative"
     >
       <header data-testid="dashboard-header" className="text-center pointer-events-none mt-2 shrink-0 z-20">
         <div className="inline-flex items-center justify-center px-3 py-1 mb-2 rounded-full border border-eco-green-400/30 bg-eco-green-400/10 backdrop-blur-md">
