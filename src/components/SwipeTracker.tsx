@@ -76,6 +76,8 @@ export default function SwipeTracker() {
   return (
     <div className="relative h-[200px] flex items-center justify-center perspective-1000">
       <motion.div 
+        role="region"
+        aria-label="Swipeable action card"
         drag="x"
         dragConstraints={{ left: 0, right: 0 }}
         onDragEnd={handleDragEnd}
@@ -85,12 +87,12 @@ export default function SwipeTracker() {
       >
         <p className="text-white font-medium text-center text-lg mt-2 pointer-events-none">{currentAction.text}</p>
         
-        <div className="flex justify-between mt-4 pointer-events-none">
+        <div className="flex justify-between mt-4 pointer-events-none" aria-hidden="true">
           <div className="w-14 h-14 rounded-full bg-slate-800 border border-slate-600 text-slate-300 flex items-center justify-center">
-            <X size={24} />
+            <X size={24} aria-hidden="true" />
           </div>
           <div className="w-14 h-14 rounded-full bg-eco-green-900/50 border border-eco-green-500 text-eco-green-400 flex items-center justify-center shadow-[0_0_15px_rgba(52,211,153,0.3)]">
-            <Check size={24} />
+            <Check size={24} aria-hidden="true" />
           </div>
         </div>
       </motion.div>
