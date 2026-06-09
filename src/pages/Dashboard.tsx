@@ -26,7 +26,7 @@ export default function Dashboard() {
     fetchAiInsights();
 
     return () => { isMounted = false; };
-  }, [score]); // Re-fetch only when score changes to save API calls
+  }, [score, history]); // Re-fetch only when score or history changes to save API calls
 
   return (
     <motion.main 

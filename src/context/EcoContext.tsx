@@ -71,14 +71,15 @@ export const EcoProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [points, setPoints] = useState<number>(initialState.points);
   const [history, setHistory] = useState<LoggedAction[]>(initialState.history);
   const [quests, setQuests] = useState<Quest[]>(initialState.quests);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(() => {
+    return !import.meta.env.VITE_FIREBASE_PROJECT_ID || import.meta.env.VITE_FIREBASE_PROJECT_ID === "YOUR_FIREBASE_PROJECT_ID";
+  });
   const [userId, setUserId] = useState<string | null>(null);
 
   // Auth Listener
   useEffect(() => {
     if (!import.meta.env.VITE_FIREBASE_PROJECT_ID || import.meta.env.VITE_FIREBASE_PROJECT_ID === "YOUR_FIREBASE_PROJECT_ID") {
       console.warn("Firebase config is missing in .env.local. Falling back to memory state.");
-      setIsLoaded(true);
       return;
     }
 
