@@ -29,11 +29,12 @@ export async function generateInsights(history: LoggedAction[], currentScore: nu
 
     const parsedInsight = await response.json();
     return [parsedInsight];
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Insight Fetch Error:", error);
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return [{ 
       id: 'error-fallback', 
-      text: `AI Oracle Error: ${error.message || 'Unknown error'}`, 
+      text: `AI Oracle Error: ${errorMessage}`, 
       type: 'neutral' 
     }];
   }

@@ -1,8 +1,8 @@
 import { Sparkles, CheckCircle2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { useEco } from '../context/EcoContext';
 
-const containerVars = {
+const containerVars: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -10,7 +10,7 @@ const containerVars = {
   }
 };
 
-const itemVars = {
+const itemVars: Variants = {
   hidden: { opacity: 0, y: 20 },
   show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
 };
@@ -38,9 +38,8 @@ export default function Quests() {
           </span>
         </div>
       </header>
-      
       <motion.main 
-        variants={containerVars as any}
+        variants={containerVars}
         initial="hidden"
         animate="show"
         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 overflow-y-auto pr-2 pb-6 pt-2"
@@ -48,13 +47,12 @@ export default function Quests() {
         {quests.map(quest => {
           const progress = (quest.currentCount / quest.targetCount) * 100;
           return (
-            <motion.div variants={itemVars as any} key={quest.id} className={`glass-panel p-6 relative overflow-hidden transition-all duration-300 ${quest.completed ? 'opacity-70 border-eco-green-500/50 bg-eco-green-900/10' : ''}`}>
+            <motion.div variants={itemVars} key={quest.id} className={`glass-panel p-6 relative overflow-hidden transition-all duration-300 ${quest.completed ? 'opacity-70 border-eco-green-500/50 bg-eco-green-900/10' : ''}`}>
               {!quest.completed && (
                 <div className="absolute top-0 right-0 p-4 opacity-10">
                   <Sparkles size={64} className="text-eco-peach-400" />
                 </div>
               )}
-              
               <h3 className="font-medium text-white text-xl mb-2 relative z-10 flex items-center gap-2">
                 {quest.title} {quest.completed && <CheckCircle2 className="text-eco-green-500" size={24} />}
               </h3>

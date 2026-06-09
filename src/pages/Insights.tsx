@@ -1,9 +1,9 @@
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { useEco } from '../context/EcoContext';
 import { generateInsights, type InsightMessage } from '../utils/ai';
 import { useState, useEffect } from 'react';
 
-const containerVars = {
+const containerVars: Variants = {
   hidden: { opacity: 0 },
   show: {
     opacity: 1,
@@ -11,7 +11,7 @@ const containerVars = {
   }
 };
 
-const itemVars = {
+const itemVars: Variants = {
   hidden: { opacity: 0, x: -20 },
   show: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
 };
@@ -46,10 +46,10 @@ export default function Insights() {
       <main className="grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden flex-1 pb-6 pt-2">
         <div className="glass-panel p-8 flex flex-col overflow-hidden">
           <h2 className="text-2xl font-light text-white mb-6 shrink-0">Oracle AI Analysis</h2>
-          <motion.div variants={containerVars as any} initial="hidden" animate="show" className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
+          <motion.div variants={containerVars} initial="hidden" animate="show" className="flex flex-col gap-4 overflow-y-auto pr-2 pb-4">
             {insights.map(insight => (
               <motion.div 
-                variants={itemVars as any}
+                variants={itemVars}
                 key={insight.id} 
                 className={`p-5 rounded-3xl rounded-tl-sm text-sm leading-relaxed border shrink-0 ${
                   insight.type === 'praise' ? 'bg-eco-green-900/40 text-eco-green-400 border-eco-green-500/50' :
@@ -70,9 +70,9 @@ export default function Insights() {
               No actions logged yet.
             </div>
           ) : (
-            <motion.div variants={containerVars as any} initial="hidden" animate="show" className="flex flex-col gap-3 overflow-y-auto pr-2 pb-4">
+            <motion.div variants={containerVars} initial="hidden" animate="show" className="flex flex-col gap-3 overflow-y-auto pr-2 pb-4">
               {history.map((action, i) => (
-                <motion.div variants={itemVars as any} key={i} className="flex items-center justify-between p-4 border border-slate-700 rounded-2xl bg-slate-900/40 hover:bg-slate-800 transition-colors shrink-0">
+                <motion.div variants={itemVars} key={i} className="flex items-center justify-between p-4 border border-slate-700 rounded-2xl bg-slate-900/40 hover:bg-slate-800 transition-colors shrink-0">
                   <span className="text-sm font-medium text-slate-200">{action.text}</span>
                   <span className="text-xs font-bold text-eco-green-400 bg-eco-green-900/50 px-2 py-1 border border-eco-green-500/30 rounded-full">{action.impact} Footprint</span>
                 </motion.div>

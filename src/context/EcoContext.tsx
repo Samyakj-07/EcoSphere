@@ -62,7 +62,7 @@ const initialState: EcoState = {
   resetData: () => {},
 };
 
-const EcoContext = createContext<EcoState>(initialState);
+export const EcoContext = createContext<EcoState>(initialState);
 
 export const useEco = () => useContext(EcoContext);
 

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Check, X, RotateCcw } from 'lucide-react';
-import { motion, useAnimation, useMotionValue, useTransform } from 'framer-motion';
+import { motion, useAnimation, useMotionValue, useTransform, type PanInfo } from 'framer-motion';
 import { useEco, type ActionId } from '../context/EcoContext';
 
 import { IMPACT_SCORES } from '../config/constants';
@@ -50,7 +50,7 @@ export default function SwipeTracker() {
 
   const currentAction = DAILY_ACTIONS[currentIndex];
 
-  const handleDragEnd = async (_event: any, info: any) => {
+  const handleDragEnd = async (_event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     const offset = info.offset.x;
     const velocity = info.velocity.x;
 
@@ -80,7 +80,7 @@ export default function SwipeTracker() {
         dragConstraints={{ left: 0, right: 0 }}
         onDragEnd={handleDragEnd}
         animate={controls}
-        style={{ x, rotate, opacity, backgroundColor: bgIndicator as any }}
+        style={{ x, rotate, opacity, backgroundColor: bgIndicator as unknown as string }}
         className="absolute inset-0 border border-slate-700 shadow-xl rounded-2xl p-6 flex flex-col justify-between cursor-grab active:cursor-grabbing z-10"
       >
         <p className="text-white font-medium text-center text-lg mt-2 pointer-events-none">{currentAction.text}</p>

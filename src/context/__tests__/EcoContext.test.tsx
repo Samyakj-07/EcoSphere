@@ -11,14 +11,14 @@ vi.mock('../../config/firebase', () => ({
 vi.mock('firebase/firestore', () => ({
   doc: vi.fn(),
   setDoc: vi.fn().mockResolvedValue(undefined),
-  onSnapshot: vi.fn((_ref: any, callback: any) => {
+  onSnapshot: vi.fn((_ref: unknown, callback: (data: unknown) => void) => {
     callback({ exists: () => false });
     return vi.fn();
   })
 }));
 vi.mock('firebase/auth', () => ({
   signInAnonymously: vi.fn().mockResolvedValue({ user: { uid: 'test-uid' } }),
-  onAuthStateChanged: vi.fn((_auth: any, callback: any) => {
+  onAuthStateChanged: vi.fn((_auth: unknown, callback: (user: unknown) => void) => {
     callback({ uid: 'test-uid' });
     return vi.fn();
   })
