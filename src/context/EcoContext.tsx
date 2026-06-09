@@ -1,6 +1,8 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { doc, setDoc, onSnapshot } from 'firebase/firestore';
+import { db } from '../config/firebase';
 
-export type ActionId = 'reusable_cup' | 'plant_based' | 'transit_bike' | 'cold_wash' | 'no_food_waste';
+export type ActionId = 'reusable_cup' | 'plant_based' | 'transit_bike' | 'cold_wash' | 'no_food_waste' | 'second_hand' | 'short_shower' | 'turn_off_lights';
 
 export interface LoggedAction {
   id: ActionId;
@@ -64,75 +66,121 @@ const EcoContext = createContext<EcoState>(initialState);
 export const useEco = () => useContext(EcoContext);
 
 export const EcoProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [score, setScore] = useState<number>(() => {
-    const saved = localStorage.getItem('ecoSphere_score');
-    return saved ? JSON.parse(saved) : initialState.score;
-  });
+  const [score, setScore] = useState<number>(initialState.score);
+  const [points, setPoints] = useState<number>(initialState.points);
+  const [history, setHistory] = useState<LoggedAction[]>(initialState.history);
+  const [quests, setQuests] = useState<Quest[]>(initialState.quests);
+  const [isLoaded, setIsLoaded] = useState(false);
 
-  const [points, setPoints] = useState<number>(() => {
-    const saved = localStorage.getItem('ecoSphere_points');
-    return saved ? JSON.parse(saved) : initialState.points;
-  });
+  const getDeviceId = () => {
+    let id = localStorage.getItem('ecoSphere_device_id');
+    if (!id) {
+      id = 'user_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+      localStorage.setItem('ecoSphere_device_id', id);
+    }
+    return id;
+  };
 
-  const [history, setHistory] = useState<LoggedAction[]>(() => {
-    const saved = localStorage.getItem('ecoSphere_history');
-    return saved ? JSON.parse(saved) : initialState.history;
-  });
+  const USER_DOC_ID = React.useMemo(() => getDeviceId(), []);
 
-  const [quests, setQuests] = useState<Quest[]>(() => {
-    const saved = localStorage.getItem('ecoSphere_quests');
-    return saved ? JSON.parse(saved) : initialState.quests;
-  });
-
-  // Persist to local storage
+  // Load from Firebase
   useEffect(() => {
-    localStorage.setItem('ecoSphere_score', JSON.stringify(score));
-    localStorage.setItem('ecoSphere_points', JSON.stringify(points));
-    localStorage.setItem('ecoSphere_history', JSON.stringify(history));
-    localStorage.setItem('ecoSphere_quests', JSON.stringify(quests));
-  }, [score, points, history, quests]);
+    if (!import.meta.env.VITE_FIREBASE_PROJECT_ID || import.meta.env.VITE_FIREBASE_PROJECT_ID === "YOUR_FIREBASE_PROJECT_ID") {
+      console.warn("Firebase config is missing in .env.local. Falling back to memory state.");
+      setIsLoaded(true);
+      return;
+    }
 
-  const logAction = (actionId: ActionId, text: string, impact: number) => {
-    // Update score
-    setScore((prev) => Math.max(0, prev + impact)); // Impact is usually negative to reduce footprint
+    const userDocRef = doc(db, 'users', USER_DOC_ID);
     
-    // Add to history
+    const unsubscribe = onSnapshot(userDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setScore(data.score ?? initialState.score);
+        setPoints(data.points ?? initialState.points);
+        setHistory(data.history ?? initialState.history);
+        setQuests(data.quests ?? initialState.quests);
+      } else {
+        // Initialize default user if not exists
+        setDoc(userDocRef, {
+          score: initialState.score,
+          points: initialState.points,
+          history: initialState.history,
+          quests: initialState.quests,
+        }).catch(err => console.error("Error creating user doc:", err));
+      }
+      setIsLoaded(true);
+    }, (error) => {
+      console.error("Firestore onSnapshot error:", error);
+      // Fallback to initial state so the app doesn't freeze
+      setIsLoaded(true);
+      alert("Database Error: Make sure your Firestore Database is created in 'Test Mode'. Check browser console for details.");
+    });
+
+    return () => unsubscribe();
+  }, []);
+
+  const logAction = async (actionId: ActionId, text: string, impact: number) => {
+    const newScore = Math.max(0, score + impact);
     const newAction: LoggedAction = {
       id: actionId,
       text,
       impact,
       date: new Date().toISOString()
     };
-    setHistory((prev) => [newAction, ...prev]);
+    const newHistory = [newAction, ...history];
 
-    // Update Quests
-    setQuests((prevQuests) => {
-      let pointsEarned = 0;
-      const updatedQuests = prevQuests.map(quest => {
-        if (!quest.completed && quest.targetActionId === actionId) {
-          const newCount = quest.currentCount + 1;
-          const isCompleted = newCount >= quest.targetCount;
-          if (isCompleted) {
-            pointsEarned += quest.points;
-          }
-          return { ...quest, currentCount: newCount, completed: isCompleted };
-        }
-        return quest;
-      });
-
-      if (pointsEarned > 0) {
-        setPoints(p => p + pointsEarned);
+    let pointsEarned = 0;
+    const newQuests = quests.map(quest => {
+      if (!quest.completed && quest.targetActionId === actionId) {
+        const newCount = quest.currentCount + 1;
+        const isCompleted = newCount >= quest.targetCount;
+        if (isCompleted) pointsEarned += quest.points;
+        return { ...quest, currentCount: newCount, completed: isCompleted };
       }
-      return updatedQuests;
+      return quest;
     });
+
+    const newPoints = points + pointsEarned;
+
+    // Update state optimistically
+    setScore(newScore);
+    setPoints(newPoints);
+    setHistory(newHistory);
+    setQuests(newQuests);
+
+    // Save to Firebase
+    if (import.meta.env.VITE_FIREBASE_PROJECT_ID && import.meta.env.VITE_FIREBASE_PROJECT_ID !== "YOUR_FIREBASE_PROJECT_ID") {
+        const userDocRef = doc(db, 'users', USER_DOC_ID);
+        await setDoc(userDocRef, {
+          score: newScore,
+          points: newPoints,
+          history: newHistory,
+          quests: newQuests
+        }, { merge: true });
+    }
   };
 
-  const resetData = () => {
+  const resetData = async () => {
     setScore(initialState.score);
     setPoints(initialState.points);
     setHistory(initialState.history);
     setQuests(initialState.quests);
+
+    if (import.meta.env.VITE_FIREBASE_PROJECT_ID && import.meta.env.VITE_FIREBASE_PROJECT_ID !== "YOUR_FIREBASE_PROJECT_ID") {
+        const userDocRef = doc(db, 'users', USER_DOC_ID);
+        await setDoc(userDocRef, {
+          score: initialState.score,
+          points: initialState.points,
+          history: initialState.history,
+          quests: initialState.quests
+        });
+    }
   };
+
+  if (!isLoaded && import.meta.env.VITE_FIREBASE_PROJECT_ID && import.meta.env.VITE_FIREBASE_PROJECT_ID !== "YOUR_FIREBASE_PROJECT_ID") {
+     return <div className="h-screen w-screen flex items-center justify-center bg-slate-950 text-white font-sans">Connecting to EcoSphere Server...</div>;
+  }
 
   return (
     <EcoContext.Provider value={{ score, points, history, quests, logAction, resetData }}>

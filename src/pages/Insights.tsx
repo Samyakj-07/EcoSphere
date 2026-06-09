@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { useEco } from '../context/EcoContext';
-import { generateInsights } from '../utils/ai';
+import { generateInsights, type InsightMessage } from '../utils/ai';
+import { useState, useEffect } from 'react';
 
 const containerVars = {
   hidden: { opacity: 0 },
@@ -17,7 +18,17 @@ const itemVars = {
 
 export default function Insights() {
   const { history, score } = useEco();
-  const insights = generateInsights(history, score);
+  const [insights, setInsights] = useState<InsightMessage[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    const fetchInsights = async () => {
+      const generated = await generateInsights(history, score);
+      if (isMounted) setInsights(generated);
+    };
+    fetchInsights();
+    return () => { isMounted = false; };
+  }, [history, score]);
 
   return (
     <motion.div 

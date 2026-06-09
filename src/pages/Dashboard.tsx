@@ -2,7 +2,8 @@ import { motion } from 'framer-motion';
 import SwipeTracker from '../components/SwipeTracker';
 import EcoVisualizer from '../components/EcoVisualizer';
 import { useEco } from '../context/EcoContext';
-import { generateInsights } from '../utils/ai';
+import { useState, useEffect } from 'react';
+import { generateInsights, type InsightMessage } from '../utils/ai';
 
 /**
  * Main dashboard view for EcoSphere. 
@@ -10,8 +11,22 @@ import { generateInsights } from '../utils/ai';
  */
 export default function Dashboard() {
   const { score, history } = useEco();
-  
-  const topInsight = generateInsights(history, score)[0];
+  const [topInsight, setTopInsight] = useState<InsightMessage | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+    
+    const fetchAiInsights = async () => {
+      const insights = await generateInsights(history, score);
+      if (isMounted && insights.length > 0) {
+        setTopInsight(insights[0]);
+      }
+    };
+
+    fetchAiInsights();
+
+    return () => { isMounted = false; };
+  }, [score]); // Re-fetch only when score changes to save API calls
 
   return (
     <motion.main 
